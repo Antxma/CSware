@@ -1,0 +1,1111 @@
+local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
+
+local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
+local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
+
+local Window = Library:CreateWindow({
+    Title = 'CSware MM2',
+    Center = true,
+    AutoShow = true,
+    TabPadding = 8,
+    MenuFadeTime = 0.2
+})
+
+local Tabs = {
+    Info = Window:AddTab('Information'),
+}
+
+local LeftInfoBox = Tabs.Info:AddLeftGroupbox('General')
+local RightInfoBox = Tabs.Info:AddRightGroupbox('Bugs')
+
+local Tabs = {
+    ESP = Window:AddTab('ESP'),
+}
+
+local LeftESPBox = Tabs.ESP:AddLeftGroupbox('MM2')
+
+LeftESPBox:AddToggle('Murder ESP', {
+    Text = 'Murder ESP',
+    Default = false,
+    Tooltip = 'Highlights the Murderer in red.',
+
+    Callback = function(Value)
+        if not _G.ToggleMurderer then
+            _G.ToggleMurderer = true
+        else
+            _G.ToggleMurderer = not _G.ToggleMurderer
+        end
+
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        local function removeHighlights()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("Murder_Highlight") then
+                    player.Character.Murder_Highlight:Destroy()
+                end
+            end
+        end
+
+        if not _G.ToggleMurderer then
+            removeHighlights()
+            return
+        end
+
+        local function getRole(player)
+            if not player.Character then return "Innocent" end
+            local backpack = player:FindFirstChildOfClass("Backpack")
+            local character = player.Character
+            
+            local function checkItem(item)
+                if item:IsA("Tool") and item.Name == "Knife" then
+                    return "Murderer"
+                end
+                return nil
+            end
+            
+            if backpack then
+                for _, item in ipairs(backpack:GetChildren()) do
+                    if checkItem(item) then return "Murderer" end
+                end
+            end
+            
+            for _, item in ipairs(character:GetChildren()) do
+                if checkItem(item) then return "Murderer" end
+            end
+            
+            return "Innocent"
+        end
+
+        task.spawn(function()
+            while _G.ToggleMurderer do
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        pcall(function()
+                            local character = player.Character
+                            local highlight = character:FindFirstChild("Murder_Highlight")
+                            
+                            if getRole(player) == "Murderer" then
+                                if not highlight then
+                                    highlight = Instance.new("Highlight")
+                                    highlight.Name = "Murder_Highlight"
+                                    highlight.Adornee = character
+                                    highlight.Parent = character
+                                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                end
+                                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            else
+                                if highlight then highlight:Destroy() end
+                            end
+                        end)
+                    end
+                end
+                task.wait(1)
+            end
+            removeHighlights()
+        end)
+    end
+})
+
+LeftESPBox:AddToggle('Sheriff ESP', {
+    Text = 'Sheriff ESP',
+    Default = false,
+    Tooltip = 'Highlights the Sheriff in blue.',
+
+    Callback = function(Value)
+        if not _G.ToggleSheriff then
+            _G.ToggleSheriff = true
+        else
+            _G.ToggleSheriff = not _G.ToggleSheriff
+        end
+
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        local function removeHighlights()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("Sheriff_Highlight") then
+                    player.Character.Sheriff_Highlight:Destroy()
+                end
+            end
+        end
+
+        if not _G.ToggleSheriff then
+            removeHighlights()
+            return
+        end
+
+        local function getRole(player)
+            if not player.Character then return "Innocent" end
+            local backpack = player:FindFirstChildOfClass("Backpack")
+            local character = player.Character
+            
+            local function checkItem(item)
+                if item:IsA("Tool") and (item.Name == "Gun" or item.Name == "Revolver") then
+                    return "Sheriff"
+                end
+                return nil
+            end
+            
+            if backpack then
+                for _, item in ipairs(backpack:GetChildren()) do
+                    if checkItem(item) then return "Sheriff" end
+                end
+            end
+            
+            for _, item in ipairs(character:GetChildren()) do
+                if checkItem(item) then return "Sheriff" end
+            end
+            
+            return "Innocent"
+        end
+
+        task.spawn(function()
+            while _G.ToggleSheriff do
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        pcall(function()
+                            local character = player.Character
+                            local highlight = character:FindFirstChild("Sheriff_Highlight")
+                            
+                            if getRole(player) == "Sheriff" then
+                                if not highlight then
+                                    highlight = Instance.new("Highlight")
+                                    highlight.Name = "Sheriff_Highlight"
+                                    highlight.Adornee = character
+                                    highlight.Parent = character
+                                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                end
+                                highlight.FillColor = Color3.fromRGB(0, 0, 255)
+                                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            else
+                                if highlight then highlight:Destroy() end
+                            end
+                        end)
+                    end
+                end
+                task.wait(1)
+            end
+            removeHighlights()
+        end)
+    end
+})
+
+LeftESPBox:AddToggle('Innocent ESP', {
+    Text = 'Innocent ESP',
+    Default = false,
+    Tooltip = 'Highlights Innocents in green.',
+
+    Callback = function(Value)
+        if not _G.ToggleInnocent then
+            _G.ToggleInnocent = true
+        else
+            _G.ToggleInnocent = not _G.ToggleInnocent
+        end
+
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        local function removeHighlights()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("Innocent_Highlight") then
+                    player.Character.Innocent_Highlight:Destroy()
+                end
+            end
+        end
+
+        if not _G.ToggleInnocent then
+            removeHighlights()
+            return
+        end
+
+        local function getRole(player)
+            if not player.Character then return "Innocent" end
+            local backpack = player:FindFirstChildOfClass("Backpack")
+            local character = player.Character
+            
+            local function checkItem(item)
+                if item:IsA("Tool") then
+                    if item.Name == "Knife" or item.Name == "Gun" or item.Name == "Revolver" then
+                        return "Special"
+                    end
+                end
+                return nil
+            end
+            
+            if backpack then
+                for _, item in ipairs(backpack:GetChildren()) do
+                    if checkItem(item) then return "Special" end
+                end
+            end
+            
+            for _, item in ipairs(character:GetChildren()) do
+                if checkItem(item) then return "Special" end
+            end
+            
+            return "Innocent"
+        end
+
+        task.spawn(function()
+            while _G.ToggleInnocent do
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        pcall(function()
+                            local character = player.Character
+                            local highlight = character:FindFirstChild("Innocent_Highlight")
+                            
+                            if getRole(player) == "Innocent" then
+                                if not highlight then
+                                    highlight = Instance.new("Highlight")
+                                    highlight.Name = "Innocent_Highlight"
+                                    highlight.Adornee = character
+                                    highlight.Parent = character
+                                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                end
+                                highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            else
+                                if highlight then highlight:Destroy() end
+                            end
+                        end)
+                    end
+                end
+                task.wait(1)
+            end
+            removeHighlights()
+        end)
+    end
+})
+
+local UniversalESPBox = Tabs.ESP:AddRightGroupbox('Universal ESPs')
+
+UniversalESPBox:AddToggle('Skeleton', {
+    Text = 'Skeleton',
+    Default = false,
+    Tooltip = 'Shows the skeleton.',
+
+    Callback = function(Value)
+        if _G.UniversalSkeletonToggle == nil then
+            _G.UniversalSkeletonToggle = true
+        else
+            _G.UniversalSkeletonToggle = not _G.UniversalSkeletonToggle
+        end
+
+        if not _G.SkeletonCache then
+            _G.SkeletonCache = {Library = nil, Skeletons = {}, Connections = {}}
+        end
+
+        local function CleanupSkeletons()
+            for _, skeleton in pairs(_G.SkeletonCache.Skeletons) do
+                pcall(function()
+                    if typeof(skeleton.Remove) == "function" then
+                        skeleton:Remove()
+                    elseif typeof(skeleton.Destroy) == "function" then
+                        skeleton:Destroy()
+                    end
+                end)
+            end
+            for _, conn in pairs(_G.SkeletonCache.Connections) do
+                pcall(function() conn:Disconnect() end)
+            end
+            _G.SkeletonCache = {Library = nil, Skeletons = {}, Connections = {}}
+        end
+
+        if not _G.UniversalSkeletonToggle then
+            CleanupSkeletons()
+            return
+        end
+
+        if not _G.SkeletonCache.Library then
+            _G.SkeletonCache.Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Blissful4992/ESPs/main/UniversalSkeleton.lua"))()
+        end
+
+        local Library = _G.SkeletonCache.Library
+        local Skeletons = _G.SkeletonCache.Skeletons
+
+        for _, Player in next, game.Players:GetChildren() do
+            table.insert(Skeletons, Library:NewSkeleton(Player, true))
+        end
+
+        local playerAddedConn = game.Players.PlayerAdded:Connect(function(Player)
+            if not _G.UniversalSkeletonToggle then return end
+            table.insert(Skeletons, Library:NewSkeleton(Player, true))
+        end)
+        table.insert(_G.SkeletonCache.Connections, playerAddedConn)
+    end
+})
+
+UniversalESPBox:AddToggle('Cornerbox', {
+    Text = 'Cornerbox',
+    Default = false,
+    Tooltip = 'Shows the corners of a box around people.',
+
+    Callback = function(Value)
+        local Settings = {
+            Box_Color = Color3.fromRGB(255, 0, 0),
+            Box_Thickness = 2,
+            Team_Check = false,
+            Team_Color = false,
+            Autothickness = true
+        }
+
+        if _G.CornerBoxToggle == nil then
+            _G.CornerBoxToggle = true
+        else
+            _G.CornerBoxToggle = not _G.CornerBoxToggle
+        end
+
+        local Space = game:GetService("Workspace")
+        local Player = game:GetService("Players").LocalPlayer
+        local Camera = Space.CurrentCamera
+
+        local function NewLine(color, thickness)
+            local line = Drawing.new("Line")
+            line.Visible = false
+            line.From = Vector2.new(0, 0)
+            line.To = Vector2.new(0, 0)
+            line.Color = color
+            line.Thickness = thickness
+            line.Transparency = 1
+            return line
+        end
+
+        local function Vis(lib, state)
+            for i, v in pairs(lib) do
+                v.Visible = state
+            end
+        end
+
+        local function Colorize(lib, color)
+            for i, v in pairs(lib) do
+                v.Color = color
+            end
+        end
+
+        local function Rainbow(lib, delay)
+            while _G.CornerBoxToggle do
+                for hue = 0, 1, 1/30 do
+                    if not _G.CornerBoxToggle then break end
+                    local color = Color3.fromHSV(hue, 0.6, 1)
+                    Colorize(lib, color)
+                    task.wait(delay)
+                end
+            end
+        end
+
+        local function Main(plr)
+            repeat task.wait() until plr.Character ~= nil and plr.Character:FindFirstChild("Humanoid") ~= nil
+            local Library = {
+                TL1 = NewLine(Settings.Box_Color, Settings.Box_Thickness),
+                TL2 = NewLine(Settings.Box_Color, Settings.Box_Thickness),
+                TR1 = NewLine(Settings.Box_Color, Settings.Box_Thickness),
+                TR2 = NewLine(Settings.Box_Color, Settings.Box_Thickness),
+                BL1 = NewLine(Settings.Box_Color, Settings.Box_Thickness),
+                BL2 = NewLine(Settings.Box_Color, Settings.Box_Thickness),
+                BR1 = NewLine(Settings.Box_Color, Settings.Box_Thickness),
+                BR2 = NewLine(Settings.Box_Color, Settings.Box_Thickness)
+            }
+            coroutine.wrap(Rainbow)(Library, 0.15)
+            local oripart = Instance.new("Part")
+            oripart.Parent = Space
+            oripart.Transparency = 1
+            oripart.CanCollide = false
+            oripart.Size = Vector3.new(1, 1, 1)
+            oripart.Position = Vector3.new(0, 0, 0)
+
+            local function Cleanup()
+                Vis(Library, false)
+                for i, v in pairs(Library) do
+                    v:Remove()
+                end
+                oripart:Destroy()
+            end
+
+            local function Updater()
+                local c
+                c = game:GetService("RunService").RenderStepped:Connect(function()
+                    if not _G.CornerBoxToggle then
+                        Vis(Library, false)
+                        return
+                    end
+
+                    if plr.Character ~= nil and plr.Character:FindFirstChild("Humanoid") ~= nil and plr.Character:FindFirstChild("HumanoidRootPart") ~= nil and plr.Character.Humanoid.Health > 0 and plr.Character:FindFirstChild("Head") ~= nil then
+                        local Hum = plr.Character
+                        local HumPos, vis = Camera:WorldToViewportPoint(Hum.HumanoidRootPart.Position)
+                        if vis then
+                            oripart.Size = Vector3.new(Hum.HumanoidRootPart.Size.X, Hum.HumanoidRootPart.Size.Y*1.5, Hum.HumanoidRootPart.Size.Z)
+                            oripart.CFrame = CFrame.new(Hum.HumanoidRootPart.CFrame.Position, Camera.CFrame.Position)
+                            local SizeX = oripart.Size.X
+                            local SizeY = oripart.Size.Y
+                            local TL = Camera:WorldToViewportPoint((oripart.CFrame * CFrame.new(SizeX, SizeY, 0)).p)
+                            local TR = Camera:WorldToViewportPoint((oripart.CFrame * CFrame.new(-SizeX, SizeY, 0)).p)
+                            local BL = Camera:WorldToViewportPoint((oripart.CFrame * CFrame.new(SizeX, -SizeY, 0)).p)
+                            local BR = Camera:WorldToViewportPoint((oripart.CFrame * CFrame.new(-SizeX, -SizeY, 0)).p)
+
+                            if Settings.Team_Check then
+                                if plr.TeamColor == Player.TeamColor then
+                                    Colorize(Library, Color3.fromRGB(0, 255, 0))
+                                else
+                                    Colorize(Library, Color3.fromRGB(255, 0, 0))
+                                end
+                            end
+
+                            if Settings.Team_Color then
+                                Colorize(Library, plr.TeamColor.Color)
+                            end
+
+                            local ratio = (Camera.CFrame.p - Hum.HumanoidRootPart.Position).magnitude
+                            local offset = math.clamp(1/ratio*750, 2, 300)
+
+                            Library.TL1.From = Vector2.new(TL.X, TL.Y)
+                            Library.TL1.To = Vector2.new(TL.X + offset, TL.Y)
+                            Library.TL2.From = Vector2.new(TL.X, TL.Y)
+                            Library.TL2.To = Vector2.new(TL.X, TL.Y + offset)
+
+                            Library.TR1.From = Vector2.new(TR.X, TR.Y)
+                            Library.TR1.To = Vector2.new(TR.X - offset, TR.Y)
+                            Library.TR2.From = Vector2.new(TR.X, TR.Y)
+                            Library.TR2.To = Vector2.new(TR.X, TR.Y + offset)
+
+                            Library.BL1.From = Vector2.new(BL.X, BL.Y)
+                            Library.BL1.To = Vector2.new(BL.X + offset, BL.Y)
+                            Library.BL2.From = Vector2.new(BL.X, BL.Y)
+                            Library.BL2.To = Vector2.new(BL.X, BL.Y - offset)
+
+                            Library.BR1.From = Vector2.new(BR.X, BR.Y)
+                            Library.BR1.To = Vector2.new(BR.X - offset, BR.Y)
+                            Library.BR2.From = Vector2.new(BR.X, BR.Y)
+                            Library.BR2.To = Vector2.new(BR.X, BR.Y - offset)
+
+                            Vis(Library, true)
+
+                            if Settings.Autothickness then
+                                local distance = (Player.Character.HumanoidRootPart.Position - oripart.Position).magnitude
+                                local value = math.clamp(1/distance*100, 1, 4)
+                                for u, x in pairs(Library) do
+                                    x.Thickness = value
+                                end
+                            else
+                                for u, x in pairs(Library) do
+                                    x.Thickness = Settings.Box_Thickness
+                                end
+                            end
+                        else
+                            Vis(Library, false)
+                        end
+                    else
+                        Vis(Library, false)
+                        if game:GetService("Players"):FindFirstChild(plr.Name) == nil then
+                            Cleanup()
+                            c:Disconnect()
+                        end
+                    end
+
+                    if not _G.CornerBoxToggle then
+                        Cleanup()
+                        c:Disconnect()
+                    end
+                end)
+            end
+            coroutine.wrap(Updater)()
+        end
+
+        if _G.CornerBoxToggle then
+            for i, v in pairs(game:GetService("Players"):GetPlayers()) do
+                if v.Name ~= Player.Name then
+                    coroutine.wrap(Main)(v)
+                end
+            end
+
+            game:GetService("Players").PlayerAdded:Connect(function(newplr)
+                if _G.CornerBoxToggle then
+                    coroutine.wrap(Main)(newplr)
+                end
+            end)
+        end
+    end
+})
+
+UniversalESPBox:AddToggle('Radar', {
+    Text = 'Radar',
+    Default = false,
+    Tooltip = 'Enables a radar which shows the position of people on a radar.',
+
+    Callback = function(Value)
+        if _G.RadarToggle == nil then
+            _G.RadarToggle = true
+        else
+            _G.RadarToggle = not _G.RadarToggle
+        end
+
+        if not _G.RadarCache then
+            _G.RadarCache = {Objects = {}, Connections = {}}
+        end
+
+        local function CleanupRadar()
+            for _, obj in pairs(_G.RadarCache.Objects) do
+                pcall(function() obj:Remove() end)
+            end
+            for _, conn in pairs(_G.RadarCache.Connections) do
+                pcall(function() conn:Disconnect() end)
+            end
+            _G.RadarCache = {Objects = {}, Connections = {}}
+        end
+
+        if not _G.RadarToggle then
+            CleanupRadar()
+            return
+        end
+
+        local Players = game:service("Players")
+        local Player = Players.LocalPlayer
+        local Mouse = Player:GetMouse()
+        local Camera = game:service("Workspace").CurrentCamera
+
+        repeat task.wait() until Player.Character ~= nil and Player.Character.PrimaryPart ~= nil
+
+        local LerpColorModule = loadstring(game:HttpGet("https://pastebin.com/raw/wRnsJeid"))()
+        local HealthBarLerp = LerpColorModule:Lerp(Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0))
+
+        local function NewCircle(Transparency, Color, Radius, Filled, Thickness)
+            local c = Drawing.new("Circle")
+            c.Transparency = Transparency
+            c.Color = Color
+            c.Visible = false
+            c.Thickness = Thickness
+            c.Position = Vector2.new(0, 0)
+            c.Radius = Radius
+            c.NumSides = math.clamp(Radius*55/100, 10, 75)
+            c.Filled = Filled
+            table.insert(_G.RadarCache.Objects, c)
+            return c
+        end
+
+        local RadarInfo = {
+            Position = Vector2.new(200, 200),
+            Radius = 100,
+            Scale = 1,
+            RadarBack = Color3.fromRGB(10, 10, 10),
+            RadarBorder = Color3.fromRGB(75, 75, 75),
+            LocalPlayerDot = Color3.fromRGB(255, 255, 255),
+            PlayerDot = Color3.fromRGB(60, 170, 255),
+            Team = Color3.fromRGB(0, 255, 0),
+            Enemy = Color3.fromRGB(255, 0, 0),
+            Health_Color = true,
+            Team_Check = true
+        }
+
+        local RadarBackground = NewCircle(0.9, RadarInfo.RadarBack, RadarInfo.Radius, true, 1)
+        RadarBackground.Visible = true
+        RadarBackground.Position = RadarInfo.Position
+
+        local RadarBorder = NewCircle(0.75, RadarInfo.RadarBorder, RadarInfo.Radius, false, 3)
+        RadarBorder.Visible = true
+        RadarBorder.Position = RadarInfo.Position
+
+        local function GetRelative(pos)
+            local char = Player.Character
+            if char ~= nil and char.PrimaryPart ~= nil then
+                local pmpart = char.PrimaryPart
+                local camerapos = Vector3.new(Camera.CFrame.Position.X, pmpart.Position.Y, Camera.CFrame.Position.Z)
+                local newcf = CFrame.new(pmpart.Position, camerapos)
+                local r = newcf:PointToObjectSpace(pos)
+                return r.X, r.Z
+            else
+                return 0, 0
+            end
+        end
+
+        local function PlaceDot(plr)
+            local PlayerDot = NewCircle(1, RadarInfo.PlayerDot, 3, true, 1)
+
+            local function Update()
+                local c
+                c = game:service("RunService").RenderStepped:Connect(function()
+                    if not _G.RadarToggle then
+                        PlayerDot.Visible = false
+                        c:Disconnect()
+                        return
+                    end
+
+                    local char = plr.Character
+                    if char and char:FindFirstChildOfClass("Humanoid") and char.PrimaryPart ~= nil and char:FindFirstChildOfClass("Humanoid").Health > 0 then
+                        local hum = char:FindFirstChildOfClass("Humanoid")
+                        local scale = RadarInfo.Scale
+                        local relx, rely = GetRelative(char.PrimaryPart.Position)
+                        local newpos = RadarInfo.Position - Vector2.new(relx * scale, rely * scale)
+                        
+                        if (newpos - RadarInfo.Position).magnitude < RadarInfo.Radius-2 then
+                            PlayerDot.Radius = 3
+                            PlayerDot.Position = newpos
+                            PlayerDot.Visible = true
+                        else
+                            local dist = (RadarInfo.Position - newpos).magnitude
+                            local calc = (RadarInfo.Position - newpos).unit * (dist - RadarInfo.Radius)
+                            local inside = Vector2.new(newpos.X + calc.X, newpos.Y + calc.Y)
+                            PlayerDot.Radius = 2
+                            PlayerDot.Position = inside
+                            PlayerDot.Visible = true
+                        end
+
+                        PlayerDot.Color = RadarInfo.PlayerDot
+                        if RadarInfo.Team_Check then
+                            if plr.TeamColor == Player.TeamColor then
+                                PlayerDot.Color = RadarInfo.Team
+                            else
+                                PlayerDot.Color = RadarInfo.Enemy
+                            end
+                        end
+
+                        if RadarInfo.Health_Color then
+                            PlayerDot.Color = HealthBarLerp(hum.Health / hum.MaxHealth)
+                        end
+                    else
+                        PlayerDot.Visible = false
+                        if Players:FindFirstChild(plr.Name) == nil then
+                            PlayerDot:Remove()
+                            c:Disconnect()
+                        end
+                    end
+                end)
+                table.insert(_G.RadarCache.Connections, c)
+            end
+            coroutine.wrap(Update)()
+        end
+
+        for _,v in pairs(Players:GetChildren()) do
+            if v.Name ~= Player.Name then
+                PlaceDot(v)
+            end
+        end
+
+        local function NewLocalDot()
+            local d = Drawing.new("Triangle")
+            d.Visible = true
+            d.Thickness = 1
+            d.Filled = true
+            d.Color = RadarInfo.LocalPlayerDot
+            d.PointA = RadarInfo.Position + Vector2.new(0, -6)
+            d.PointB = RadarInfo.Position + Vector2.new(-3, 6)
+            d.PointC = RadarInfo.Position + Vector2.new(3, 6)
+            table.insert(_G.RadarCache.Objects, d)
+            return d
+        end
+
+        local LocalPlayerDot = NewLocalDot()
+
+        local playerAddedConn = Players.PlayerAdded:Connect(function(v)
+            if not _G.RadarToggle then return end
+            if v.Name ~= Player.Name then
+                PlaceDot(v)
+            end
+            LocalPlayerDot:Remove()
+            LocalPlayerDot = NewLocalDot()
+        end)
+        table.insert(_G.RadarCache.Connections, playerAddedConn)
+
+        coroutine.wrap(function()
+            local c
+            c = game:service("RunService").RenderStepped:Connect(function()
+                if not _G.RadarToggle then
+                    c:Disconnect()
+                    return
+                end
+                if LocalPlayerDot ~= nil then
+                    LocalPlayerDot.Color = RadarInfo.LocalPlayerDot
+                    LocalPlayerDot.PointA = RadarInfo.Position + Vector2.new(0, -6)
+                    LocalPlayerDot.PointB = RadarInfo.Position + Vector2.new(-3, 6)
+                    LocalPlayerDot.PointC = RadarInfo.Position + Vector2.new(3, 6)
+                end
+                RadarBackground.Position = RadarInfo.Position
+                RadarBackground.Radius = RadarInfo.Radius
+                RadarBackground.Color = RadarInfo.RadarBack
+
+                RadarBorder.Position = RadarInfo.Position
+                RadarBorder.Radius = RadarInfo.Radius
+                RadarBorder.Color = RadarInfo.RadarBorder
+            end)
+            table.insert(_G.RadarCache.Connections, c)
+        end)()
+
+        local inset = game:service("GuiService"):GetGuiInset()
+        local dragging = false
+        local offset = Vector2.new(0, 0)
+
+        local inputBeginConn = game:service("UserInputService").InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 and (Vector2.new(Mouse.X, Mouse.Y + inset.Y) - RadarInfo.Position).magnitude < RadarInfo.Radius then
+                offset = RadarInfo.Position - Vector2.new(Mouse.X, Mouse.Y)
+                dragging = true
+            end
+        end)
+        table.insert(_G.RadarCache.Connections, inputBeginConn)
+
+        local inputEndConn = game:service("UserInputService").InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+        table.insert(_G.RadarCache.Connections, inputEndConn)
+
+        coroutine.wrap(function()
+            local dot = NewCircle(1, Color3.fromRGB(255, 255, 255), 3, true, 1)
+            local c
+            c = game:service("RunService").RenderStepped:Connect(function()
+                if not _G.RadarToggle then
+                    dot.Visible = false
+                    c:Disconnect()
+                    return
+                end
+                if (Vector2.new(Mouse.X, Mouse.Y + inset.Y) - RadarInfo.Position).magnitude < RadarInfo.Radius then
+                    dot.Position = Vector2.new(Mouse.X, Mouse.Y + inset.Y)
+                    dot.Visible = true
+                else
+                    dot.Visible = false
+                end
+                if dragging then
+                    RadarInfo.Position = Vector2.new(Mouse.X, Mouse.Y) + offset
+                end
+            end)
+            table.insert(_G.RadarCache.Connections, c)
+        end)()
+    end
+})
+
+local Tabs = {
+    Murderer = Window:AddTab('Murderer'),
+}
+
+local LeftMurdererBox = Tabs.Murderer:AddLeftGroupbox('AimBot')
+local KillBox = Tabs.Murderer:AddLeftGroupbox('Actions')
+
+KillBox:AddButton({
+    Text = 'Kill Sheriff',
+    Func = function()
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        local function getSheriff()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local backpack = player:FindFirstChildOfClass("Backpack")
+                    local character = player.Character
+                    
+                    local function checkItem(item)
+                        if item:IsA("Tool") and (item.Name == "Gun" or item.Name == "Revolver") then
+                            return true
+                        end
+                        return false
+                    end
+                    
+                    if backpack then
+                        for _, item in ipairs(backpack:GetChildren()) do
+                            if checkItem(item) then return player end
+                        end
+                    end
+                    
+                    for _, item in ipairs(character:GetChildren()) do
+                        if checkItem(item) then return player end
+                    end
+                end
+            end
+            return nil
+        end
+
+        local character = LocalPlayer.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+        local rootPart = character.HumanoidRootPart
+        local originalPosition = rootPart.CFrame
+
+        local sheriff = getSheriff()
+        if not sheriff or not sheriff.Character or not sheriff.Character:FindFirstChild("HumanoidRootPart") then return end
+
+        local sheriffRoot = sheriff.Character.HumanoidRootPart
+
+        local knife = character:FindFirstChild("Knife")
+        if not knife then
+            local backpack = LocalPlayer:FindFirstChildOfClass("Backpack")
+            if backpack then
+                knife = backpack:FindFirstChild("Knife")
+                if knife then
+                    character.Humanoid:EquipTool(knife)
+                    task.wait(0.1)
+                end
+            end
+        end
+
+        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        rootPart.CFrame = sheriffRoot.CFrame * CFrame.new(0, 0, 1)
+
+        task.wait(0.05)
+
+        if knife and knife.Parent == character then
+            pcall(function()
+                knife:Activate()
+            end)
+        end
+
+        task.wait(0.05)
+
+        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        rootPart.CFrame = originalPosition
+    end,
+    DoubleClick = false,
+    Tooltip = 'Teleports you to the sheriff, kills the sheriff and teleports you back.'
+})
+
+KillBox:AddButton({
+    Text = 'Kill All',
+    Func = function()
+        local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local character = LocalPlayer.Character
+if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+local rootPart = character.HumanoidRootPart
+local originalPosition = rootPart.CFrame
+
+-- Messer aus dem Backpack holen oder finden
+local function getKnife()
+    local k = character:FindFirstChild("Knife")
+    if not k then
+        local backpack = LocalPlayer:FindFirstChildOfClass("Backpack")
+        if backpack then
+            k = backpack:FindFirstChild("Knife")
+            if k then
+                character.Humanoid:EquipTool(k)
+                task.wait(0.2)
+            end
+        end
+    end
+    return character:FindFirstChild("Knife")
+end
+
+-- Alle Spieler nacheinander durchgehen
+for _, player in ipairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local targetRoot = player.Character.HumanoidRootPart
+        
+        -- Zum Spieler teleportieren
+        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        rootPart.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 1)
+        
+        task.wait(0.1)
+        
+        -- Sicherstellen, dass das Messer ausgerüstet ist und frisch zuschlägt
+        local knife = getKnife()
+        if knife then
+            pcall(function()
+                -- Kurz de-aktivieren / aktivieren oder direkt neu triggern
+                knife:Activate()
+            end)
+        end
+        
+        -- 1 Sekunde warten, damit der Kill verarbeitet wird und der Cooldown greift
+        task.wait(1.0)
+    end
+end
+
+-- Am Ende zurück zur Ausgangsposition
+rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+rootPart.CFrame = originalPosition
+    end,
+    DoubleClick = false,
+    Tooltip = 'Teleports you behind everyone and kills them.'
+})
+
+local KillMurderer = KillBox:AddButton({
+    Text = 'Kill Murderer',
+    Func = function()
+    local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function getMurderer()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local backpack = player:FindFirstChildOfClass("Backpack")
+            local character = player.Character
+            
+            local function checkItem(item)
+                if item:IsA("Tool") and item.Name == "Knife" then
+                    return true
+                end
+                return false
+            end
+            
+            if backpack then
+                for _, item in ipairs(backpack:GetChildren()) do
+                    if checkItem(item) then return player end
+                end
+            end
+            
+            for _, item in ipairs(character:GetChildren()) do
+                if checkItem(item) then return player end
+            end
+        end
+    end
+    return nil
+end
+
+local character = LocalPlayer.Character
+if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+local rootPart = character.HumanoidRootPart
+local originalPosition = rootPart.CFrame
+
+local murderer = getMurderer()
+if not murderer or not murderer.Character or not murderer.Character:FindFirstChild("HumanoidRootPart") then return end
+
+local murdererRoot = murderer.Character.HumanoidRootPart
+
+-- Gun (Revolver) automatisch ausrüsten
+local gun = character:FindFirstChild("Gun") or character:FindFirstChild("Revolver")
+if not gun then
+    local backpack = LocalPlayer:FindFirstChildOfClass("Backpack")
+    if backpack then
+        gun = backpack:FindFirstChild("Gun") or backpack:FindFirstChild("Revolver")
+        if gun then
+            character.Humanoid:EquipTool(gun)
+            task.wait(0.1)
+        end
+    end
+end
+
+-- 1. Direkt hinter den Murderer teleportieren und Blickrichtung anpassen, damit der Raycast/Schuss sofort trifft
+rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+rootPart.CFrame = CFrame.new(murdererRoot.Position - (murdererRoot.CFrame.LookVector * 2), murdererRoot.Position)
+
+task.wait(0.05)
+
+-- 2. Schießen auslösen (simuliert den Klick und feuert die Waffe ab)
+if gun and gun.Parent == character then
+    pcall(function()
+        -- MM2 spezifischer Schuss-Aufruf / Tool Aktivierung
+        gun:Activate()
+        
+        -- Fallback: Falls das Tool ein RemoteEvent nutzt, erzwingen wir den Schuss direkt auf die Position
+        local shootRemote = gun:FindFirstChild("Shoot") or gun:FindFirstChild("Fire") or gun:FindFirstChild("GunEvent")
+        if shootRemote and shootRemote:IsA("RemoteEvent") then
+            shootRemote:FireServer(murdererRoot.Position)
+        end
+    end)
+end
+
+task.wait(0.05)
+
+-- 3. Zurück zur Ausgangsposition
+rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+rootPart.CFrame = originalPosition    
+    end,
+    DoubleClick = false,
+    Tooltip = 'This is the main button'
+})
+
+
+LeftMurdererBox:AddToggle('Auto grab gun', {
+    Text = 'Auto grab gun',
+    Default = false,
+    Tooltip = '',
+
+    Callback = function(Value)
+        if not _G.ToggleAutoGrabGun then
+    _G.ToggleAutoGrabGun = true
+else
+    _G.ToggleAutoGrabGun = not _G.ToggleAutoGrabGun
+end
+
+if not _G.ToggleAutoGrabGun then
+    return
+end
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- Funktion die prüft ob eine Gun im Workspace liegt
+local function getDroppedGun()
+    for _, obj in ipairs(Workspace:GetChildren()) do
+        -- Manchmal ist die Gun ein einzelnes Tool oder ein Part das "Gun" heißt oder ein Handle hat
+        if obj.Name == "Gun" or obj.Name == "Revolver" or obj.Name == "Drop" then
+            if obj:IsA("Tool") or obj:IsA("Model") or obj:IsA("Part") then
+                return obj
+            end
+        end
+    end
+    
+    -- Suche tiefer in Descendants nach typischen MM2 Drop-Strukturen
+    for _, desc in ipairs(Workspace:GetDescendants()) do
+        if desc.Name == "Handle" and desc.Parent then
+            local parentName = desc.Parent.Name:lower()
+            if parentName == "gun" or parentName == "revolver" or parentName == "drop" then
+                -- Prüfen ob es nicht im Rucksack eines Spielers ist
+                local topParent = desc.Parent.Parent
+                if topParent == Workspace then
+                    return desc.Parent
+                end
+            end
+        end
+    end
+    
+    return nil
+end
+
+local function getPosition(target)
+    if target:IsA("BasePart") then
+        return target.CFrame
+    elseif target:IsA("Model") then
+        return target:GetPivot()
+    elseif target:IsA("Tool") and target:FindFirstChild("Handle") then
+        return target.Handle.CFrame
+    end
+    return nil
+end
+
+-- Hintergrund-Loop der läuft solange _G.ToggleAutoGrabGun true ist
+task.spawn(function()
+    while _G.ToggleAutoGrabGun do
+        local character = LocalPlayer.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+        
+        -- Nur ausführen wenn Spieler lebt
+        if humanoid and humanoid.Health > 0 and rootPart then
+            local gun = getDroppedGun()
+            if gun then
+                local gunCFrame = getPosition(gun)
+                if gunCFrame then
+                    local originalPosition = rootPart.CFrame
+                    
+                    -- Zur Waffe teleportieren
+                    rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    rootPart.CFrame = gunCFrame + Vector3.new(0, 2, 0)
+                    
+                    task.wait(0.2)
+                    
+                    -- Zurück zur Ausgangsposition
+                    if character and character.Parent and humanoid.Health > 0 and rootPart.Parent then
+                        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                        rootPart.CFrame = originalPosition
+                    end
+                    
+                    -- Warten bis die Waffe weg ist, damit es nicht spammt
+                    local timeout = 0
+                    while _G.ToggleAutoGrabGun and getDroppedGun() and timeout < 25 do
+                        task.wait(0.2)
+                        timeout = timeout + 1
+                    end
+                end
+            end
+        else
+            -- Wenn tot, warten bis Respawn in der nächsten Runde
+            LocalPlayer.CharacterAdded:Wait()
+            task.wait(1.5)
+        end
+        
+        task.wait(0.3)
+    end
+end)
+    end
+})
